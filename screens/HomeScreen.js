@@ -1,6 +1,6 @@
 import * as WebBrowser from "expo-web-browser";
 import React, { useEffect, useState } from "react";
-import {Button,TextInput} from 'react-native';
+import { Button, TextInput } from "react-native";
 import {
   Image,
   Platform,
@@ -12,52 +12,52 @@ import {
 } from "react-native";
 
 import { MonoText } from "../components/StyledText";
-import db from './db.js'
-
-
+import db from "./db.js";
+import firebase from 'firebase/app';
+import "firebase/auth"
 
 export default function HomeScreen() {
-  const [from, setFrom] = React.useState(" ");
   const [to, setTo] = React.useState(" ");
   const [text, setText] = React.useState(" ");
   const [id, setId] = React.useState(" ");
 
   const [messages, setMessages] = useState([]);
-
+  
   useEffect(() => {
-    db.collection("messages").onSnapshot(querySnapshot=> {
+    db.collection("messages").onSnapshot(querySnapshot => {
       const messages = [];
       querySnapshot.forEach(function(doc) {
-          messages.push({id:doc.id,...doc.data()});
+        messages.push({ id: doc.id, ...doc.data() });
       });
-      
+
       console.log("Current messages: ", messages);
       setMessages([...messages]);
     });
-    
   }, []);
-  const handleDelete=(message)=>{
-db.collection("messages").doc(message.id).delete()
-};
+  const handleDelete = message => {
+    db.collection("messages")
+      .doc(message.id)
+      .delete();
+  };
 
-const handleEdit=message=>{
-  setFrom(message.from)
-  setText(message.text)
-  setTo(message.to)
-  setId(message.id)
-}
-const handleSend=()=>{
-  if(id){
-db.collection("messages").doc(id).update({from,to,text})
-  }
-  else{
-  db.collection("messages ").add({from,to,text});
-  }
-  setFrom("")
-  setTo("")
-  setText("")
-  setId("")
-};
+  const handleEdit = message => {
+    setText(message.text);
+    setTo(message.to);
+    setId(message.id);
+  };
+  const handleSend = () => {
+    const from=firebase.auth().currentUser.uid
+    if (id) {
+      db.collection("messages")
+        .doc(id)
+        .update({ from, to, text });
+    } else {
+      db.collection("messages ").add({ from, to, text });
+    }
+    setTo("");
+    setText("");
+    setId("");
+  };
   return (
     <View style={styles.container}>
       <ScrollView
@@ -67,44 +67,25 @@ db.collection("messages").doc(id).update({from,to,text})
       >
         {messages.map((message, i) => (
           <View style={styles.getStartedText} key={i}>
-          <Text style={styles.getStartedText} >
-            
-            {message.text}
-          </Text>
-          <Button
-          title="Delete"
-          onPress={() => handleDelete(message)}
-        />
-        <Button
-          title="Edit"
-          onPress={() => handleEdit(message)}
-        />
+            <Text style={styles.getStartedText}>{message.text}To {message.to} from {message.from}</Text>
+            <Button title="Delete" onPress={() => handleDelete(message)} />
+            <Button title="Edit" onPress={() => handleEdit(message)} />
           </View>
-        ))} 
-         <TextInput
-      style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-      onChangeText={setFrom}
-      value={from}
-      placeholder="From"
-    />
+        ))}
+        
         <TextInput
-      style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-      onChangeText={setTo}
-      value={to}
-      placeholder="To"
-
-    />
-        <TextInput
-      style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-      onChangeText={setText}
-      value={text}
-      placeholder="Text"
-
-    />
-     <Button
-          title="Send"
-          onPress={() => handleSend()}
+          style={{ height: 40, borderColor: "gray", borderWidth: 1 }}
+          onChangeText={setTo}
+          value={to}
+          placeholder="To"
         />
+        <TextInput
+          style={{ height: 40, borderColor: "gray", borderWidth: 1 }}
+          onChangeText={setText}
+          value={text}
+          placeholder="Text"
+        />
+        <Button title="Send" onPress={() => handleSend()} />
       </ScrollView>
     </View>
   );
