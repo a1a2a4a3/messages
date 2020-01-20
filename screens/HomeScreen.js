@@ -51,7 +51,7 @@ const handleSend=()=>{
 db.collection("messages").doc(id).update({from,to,text})
   }
   else{
-  db.collection("messages").add({from,to,text});
+  db.collection("messages ").add({from,to,text});
   }
   setFrom("")
   setTo("")
