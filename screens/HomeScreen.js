@@ -1,6 +1,7 @@
 import * as WebBrowser from "expo-web-browser";
 import React, { useEffect, useState } from "react";
 import { Button, TextInput } from "react-native";
+import Message from './Message.js'
 import {
   Image,
   Platform,
@@ -34,11 +35,11 @@ export default function HomeScreen() {
       setMessages([...messages]);
     });
   }, []);
-  const handleDelete = message => {
-    db.collection("messages")
-      .doc(message.id)
-      .delete();
-  };
+  
+
+  const handleLogout=()=>{
+    firebase.auth().signOut();
+  }
 
   const handleEdit = message => {
     setText(message.text);
@@ -65,12 +66,11 @@ export default function HomeScreen() {
         contentContainerStyle={styles.contentContainer}
         keyboardShouldPersistTaps="always"
       >
+                    <Button title="Logout" onPress={() => handleLogout()} />
+
         {messages.map((message, i) => (
-          <View style={styles.getStartedText} key={i}>
-            <Text style={styles.getStartedText}>{message.text}To {message.to} from {message.from}</Text>
-            <Button title="Delete" onPress={() => handleDelete(message)} />
-            <Button title="Edit" onPress={() => handleEdit(message)} />
-          </View>
+            <Message key={i}message={message} handleEdit={handleEdit}/>
+           
         ))}
         
         <TextInput

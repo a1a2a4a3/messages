@@ -9,6 +9,7 @@ import { Button, TextInput } from "react-native";
 import AppNavigator from "./navigation/AppNavigator";
 import firebase from 'firebase/app';
 import "firebase/auth"
+import db from "./screens/db";
 
 export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
@@ -22,11 +23,12 @@ export default function App(props) {
   },[]);
 
   const handleLogin = () => {
-    firebase.auth().signInWithEmailAndPassword(Email, Password)
+     firebase.auth().signInWithEmailAndPassword(Email, Password)
   };
 
-  const handleRegister = () => {
-    firebase.auth().createUserWithEmailAndPassword(Email, Password)
+  const handleRegister = async() => {
+    await firebase.auth().createUserWithEmailAndPassword(Email, Password)
+    db.collection('users').doc(firebase.auth().currentUser.uid).update({displayName:"",photoURL})
   };
 
   if (!isLoadingComplete && !props.skipLoadingScreen) {
